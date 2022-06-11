@@ -1,0 +1,50 @@
+{% extends "mail/layout.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container align-items-center glass">
+    <div class="row align-items-center">
+        <div class="col-sm-4">
+            <button class="btn btn-sm btn-light" id="inbox">Inbox</button>
+            <button class="btn btn-sm btn-light" id="sent">Sent</button>
+            <button class="btn btn-sm btn-light" id="archived">Archived</button>
+        </div>
+        <div class="col-sm-4 text-center">
+            <h3 class="m-0">🐼</h3>
+            <span>Logged as :</span>    
+            <h2 class="fs-6">{{ request.user.email }}</h2>
+        </div>
+        <div class="col-sm-4 text-end">
+            <button class="btn btn-sm btn-light text-success" id="compose">Compose <i class="fa-solid fa-pen-to-square"></i></button>
+            <a class="btn btn-sm btn-danger" href="{% url 'logout' %}">Log Out</a>
+        </div>
+    </div>
+    <hr>
+    <br>
+    <div class="row glass mx-1 mb-5">
+        <div id="emails-view" class="text-center">
+        </div>
+        <div id="compose-view" class="text-center">
+            <h3>New Email</h3>
+            <form id="compose-form">
+                <div class="form-group my-3 text-start">
+                    From: <input disabled class="form-control" value="{{ request.user.email }}">
+                </div>
+                <div class="form-group my-3 text-start">
+                    To: <input id="compose-recipients" class="form-control">
+                </div>
+                <div class="form-group my-3">
+                    <input class="form-control" id="compose-subject" placeholder="Subject">
+                </div>
+                <textarea class="form-control my-3" id="compose-body" placeholder="Body" rows="8"></textarea>
+                <input type="submit" class="btn btn-primary" id="send-email-btn" />
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'mail/inbox.js' %}"></script>
+{% endblock %}
