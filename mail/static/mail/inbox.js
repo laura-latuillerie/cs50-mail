@@ -59,6 +59,7 @@ function send_email() {
 //
 function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#emails-view').style.display = 'block';
   // Empty the current mailbox to switch to another mailbox content
@@ -107,12 +108,93 @@ function load_mailbox(mailbox) {
         // For all the email lines except the titling one, 
         if (email !==  email_table_titles) {
           // Add specific classes
-          email_line.classList.add("row","email-line", "my-2", "px-1", "rounded", email["read"] ? "read" : "unread");
+          email_line.classList.add("row", "email-line", "my-2", "px-1", "rounded", email["read"] ? "read" : "unread");
           // Add the controls to open an individual view for each mail
           email_line.addEventListener('click', () => load_email(email["id"], mailbox));
-          // All the email-lines will append and appear in the "emails view" div.
+          // All the email lines will append and appear in the "emails view" div
           document.querySelector('#emails-view').append(email_line);
         }
       })
     })
   }
+
+/***********************************************************************/
+//
+function load_email(email_id, origin_mailbox) {
+  // Show the mail view and hide other views
+  document.querySelector('#email-table-titles-view').style.display = 'none';
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'block';
+  document.querySelector('#email-content').innerHTML= '';
+  document.querySelector('#email-back-section').innerHTML = '';
+  // Use api to fetch this email
+  fetch(`/emails/${email_id}`)
+      .then(response => response.json())
+      .then(email => {
+          ["subject", "timestamp", "sender", "recipients", "body"].forEach(email_element => {
+              const email_section = document.createElement('div');
+              email_section.classList.add("row", `email-${email_element}-section`);
+              if (email_element === "subject") {
+                  // For the subject, I want to have the subject section but also two buttons on the right side
+                  // for replying and archiving
+
+                  //first the subject section
+                  const div_col_subject = document.createElement('div');
+                  div_col_subject.classList.add("col-8");
+                  div_col_subject.id = "email-subject";
+                  div_col_subject.innerHTML  = `<p>${email[email_element]}</p>`;
+                  email_section.append(div_col_subject);
+
+                  // Now a section for the two buttons
+                  const div_col_reply_archive = document.createElement('div');
+                  div_col_reply_archive.classList.add("col-4");
+                  div_col_reply_archive.id="archive-reply-button";
+                  const data_for_potential_buttons_to_add = [
+                      ["Reply", () => reply_email(email)], // a reply button
+                      [email["archived"] ? "Unarchive" : "Archive",
+                          () => archive_email(email_id, !email["archived"] )] // Archive button
+                  ];
+
+                  // if the mailbox we came from was "sent" mailbox, then we actually don't need the archive button
+                  (origin_mailbox === "sent" ?
+                      data_for_potential_buttons_to_add.slice(0,1) : data_for_potential_buttons_to_add)
+                  .forEach( text_function => {
+                      const text = text_function[0];
+                      const callback_func = text_function[1];
+                      const button = document.createElement("button");
+                      button.classList.add("float-right");
+                      button.innerHTML = text;
+                      button.addEventListener('click', callback_func);
+                      div_col_reply_archive.append(button);
+                  });
+                  email_section.append(div_col_reply_archive);
+
+              }
+              else {
+                  email_section.innerHTML = `<p>${email[email_element]}</p>`;
+              }
+
+              document.querySelector("#email-content").append(email_section);
+          });
+          const back_button_row_div = document.createElement('div');
+          back_button_row_div.classList.add("row");
+          const back_button_col_div = document.createElement('div');
+          back_button_col_div.classList.add("col-2", "offset-5");
+          back_button_col_div.id = "back-button";
+          back_button_col_div.innerHTML =
+              `<p>${origin_mailbox.charAt(0).toUpperCase() + origin_mailbox.slice(1)}</p>`;
+          back_button_col_div.addEventListener('click', () => load_mailbox(origin_mailbox));
+          back_button_row_div.append(back_button_col_div);
+          document.querySelector("#email-back-section").append(back_button_row_div);
+
+
+      })
+      .catch(error =>console.log(error));
+  fetch(`/emails/${email_id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+          read: true
+      })
+  }).then();
+}
