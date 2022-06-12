@@ -61,9 +61,40 @@ function send_email() {
 //
 function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
-  document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
-
+  document.querySelector('#emails-view').style.display = 'block';
+  // Empty the current mailbox to switch to another mailbox content
+  document.querySelector('#emails-view').innerHTML = '';
   // Show the mailbox name
-  document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+  document.querySelector('#mailbox-title').innerHTML = `<h3 class="text-center">${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+  // Use Api to fetch all the emails
+  fetch(`/emails/${mailbox}`)
+    .then(response => response.json())
+    .then(emails => {
+        //
+        const email_table_sections = [['sender', 3], ['subject', 2], ['timestamp', 2], ['body', 5]];
+        const email_table_titles = {'sender': 'Sender', 'subject': 'Subject', 'timestamp': 'Date and time', 'body' : 'Content',  'read': true};
+        emails = [ email_table_titles, ...emails];
+        emails.forEach(email => {
+          const email_line = document.createElement('div');
+          email_line.classList.add("row","email-line", email["read"] ? "read" : "unread");
+            if (email ===  email_table_titles) {
+              email_line.id = 'email-table-titles';}
+            email_table_sections.forEach(
+                section => {
+                    const section_name = section[0];
+                    const section_size = section[1];
+                    const div_section = document.createElement('div');
+                    div_section.classList.add(`col-${section_size}`, `${section_name}-section`);
+                    div_section.innerHTML = `<p>${email[section_name]}</p>`;
+                    email_line.append(div_section);
+
+                            });
+            if (email !==  email_table_titles) {
+                email_line.addEventListener('click', () => load_email(email["id"], mailbox));
+            }
+
+            document.querySelector('#emails-view').append(email_line);
+        })
+})
 }

@@ -1,11 +1,11 @@
 *{
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .gradient-bg{
-    background-color: #4158D0;
-    background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
-    ;
+    background-color: #FF3CAC;
+    background-image: linear-gradient(225deg, #FF3CAC 0%, #784BA0 50%, #142e8d 100%);
+    
 }
 
 .full-h{
@@ -34,7 +34,7 @@ textarea {
 .glass {
     color: #fff;
     padding: 20px 20px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
     border-top: 1px solid rgba(225, 225, 225, 0.4);
     border-left: 1px solid rgba(225, 225, 225, 0.2);
@@ -43,3 +43,7 @@ textarea {
     backdrop-filter: blur(12px);
     box-shadow: 0px 28px 48px rgba(0, 0, 0, 0.1);
   }
+
+#email-table-titles {
+    background-color: rgba(128, 128, 128, 0.4);
+}
