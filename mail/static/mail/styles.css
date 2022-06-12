@@ -12,6 +12,10 @@
     min-height: 100vh;
 }
 
+.selected{
+    background-color: rgb(202, 239, 154);
+    color: darkgreen;
+}
 
 .centered{
     justify-content: center;
