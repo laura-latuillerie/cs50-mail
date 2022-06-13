@@ -1,3 +1,21 @@
+/**********************************************************************/
+//
+function hide(component){
+  document.querySelector(component).style.display = 'none';
+}
+
+function show(component){
+  document.querySelector(component).style.display = 'block';
+}
+
+function clear(component){
+  document.querySelector(component).value = '';
+}
+
+function clear_HTML(component){
+  document.querySelector(component).innerHTML =  '';
+}
+
 /***********************************************************************/
 //
 document.addEventListener('DOMContentLoaded', function() {
@@ -16,12 +34,13 @@ document.addEventListener('DOMContentLoaded', function() {
 //
 function compose_email() {
   // Show compose view and hide other views
-  document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#compose-view').style.display = 'block';
+  hide('#email-table-titles-view');
+  hide('#emails-view');
+  show('#compose-view');
   // Clear out composition fields
-  document.querySelector('#compose-recipients').value = '';
-  document.querySelector('#compose-subject').value = '';
-  document.querySelector('#compose-body').value = '';
+  clear('#compose-recipients');
+  clear('#compose-subject');
+  clear('#compose-body');
 }
 
 /***********************************************************************/
@@ -59,11 +78,11 @@ function send_email() {
 //
 function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
-  document.querySelector('#email-view').style.display = 'none';
-  document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#emails-view').style.display = 'block';
+  hide('#email-view');
+  hide('#compose-view');
+  show('#emails-view');
   // Empty the current mailbox to switch to another mailbox content
-  document.querySelector('#emails-view').innerHTML = '';
+  clear_HTML('#emails-view');
   // Show the mailbox name
   document.querySelector('#mailbox-title').innerHTML = `<h3 class="text-center">${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
   // Use Api to fetch all the emails
@@ -117,84 +136,50 @@ function load_mailbox(mailbox) {
       })
     })
   }
-
-/***********************************************************************/
-//
-function load_email(email_id, origin_mailbox) {
-  // Show the mail view and hide other views
-  document.querySelector('#email-table-titles-view').style.display = 'none';
-  document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#email-view').style.display = 'block';
-  document.querySelector('#email-content').innerHTML= '';
-  document.querySelector('#email-back-section').innerHTML = '';
-  // Use api to fetch this email
-  fetch(`/emails/${email_id}`)
-      .then(response => response.json())
-      .then(email => {
-          ["subject", "timestamp", "sender", "recipients", "body"].forEach(email_element => {
-              const email_section = document.createElement('div');
-              email_section.classList.add("row", `email-${email_element}-section`);
-              if (email_element === "subject") {
-                  // For the subject, I want to have the subject section but also two buttons on the right side
-                  // for replying and archiving
-
-                  //first the subject section
-                  const div_col_subject = document.createElement('div');
-                  div_col_subject.classList.add("col-8");
-                  div_col_subject.id = "email-subject";
-                  div_col_subject.innerHTML  = `<p>${email[email_element]}</p>`;
-                  email_section.append(div_col_subject);
-
-                  // Now a section for the two buttons
-                  const div_col_reply_archive = document.createElement('div');
-                  div_col_reply_archive.classList.add("col-4");
-                  div_col_reply_archive.id="archive-reply-button";
-                  const data_for_potential_buttons_to_add = [
-                      ["Reply", () => reply_email(email)], // a reply button
-                      [email["archived"] ? "Unarchive" : "Archive",
-                          () => archive_email(email_id, !email["archived"] )] // Archive button
-                  ];
-
-                  // if the mailbox we came from was "sent" mailbox, then we actually don't need the archive button
-                  (origin_mailbox === "sent" ?
-                      data_for_potential_buttons_to_add.slice(0,1) : data_for_potential_buttons_to_add)
-                  .forEach( text_function => {
-                      const text = text_function[0];
-                      const callback_func = text_function[1];
-                      const button = document.createElement("button");
-                      button.classList.add("float-right");
-                      button.innerHTML = text;
-                      button.addEventListener('click', callback_func);
-                      div_col_reply_archive.append(button);
-                  });
-                  email_section.append(div_col_reply_archive);
-
-              }
-              else {
-                  email_section.innerHTML = `<p>${email[email_element]}</p>`;
-              }
-
-              document.querySelector("#email-content").append(email_section);
-          });
-          const back_button_row_div = document.createElement('div');
-          back_button_row_div.classList.add("row");
-          const back_button_col_div = document.createElement('div');
-          back_button_col_div.classList.add("col-2", "offset-5");
-          back_button_col_div.id = "back-button";
-          back_button_col_div.innerHTML =
-              `<p>${origin_mailbox.charAt(0).toUpperCase() + origin_mailbox.slice(1)}</p>`;
-          back_button_col_div.addEventListener('click', () => load_mailbox(origin_mailbox));
-          back_button_row_div.append(back_button_col_div);
-          document.querySelector("#email-back-section").append(back_button_row_div);
-
-
+  
+  /***********************************************************************/
+  //
+  function load_email(email_id) {
+    // Show the mail view and hide other views
+    hide('#email-table-titles-view');
+    hide('#emails-view');
+    hide('#compose-view');
+    show('#email-view');
+    // Empty all content for switching views purpose
+    clear_HTML('#subject-timestamp');
+    clear_HTML('#email-data');
+    clear_HTML('#email-body');
+    // Use api to fetch this email
+    fetch(`/emails/${email_id}`)
+    .then(response => response.json())
+    .then(email => {
+      // Get all the data I need in an array and for each one, create div with unique ID. Inside is inserted their respective content.
+      ["subject", "timestamp", "sender", "recipients", "body"].forEach(email_element => {
+        const email_section = document.createElement('div');
+        email_section.id = `email-${email_element}-section`;
+        email_section.innerHTML = `<span>${email[email_element]}</span>`;
+        // Now I use conditionnal to assign personnalized positions, CSS (boostrap classes) and content
+        if (email_element === 'subject'){
+          document.querySelector('#subject-timestamp').append(email_section);
+          email_section.classList.add('col-8', 'fs-2', 'fw-bold');
+        }
+        else if(email_element === 'timestamp'){
+          document.querySelector('#subject-timestamp').append(email_section);
+          email_section.classList.add('col-4','fw-bold', 'text-end');
+        }else if(email_element === 'body'){
+          const email_body = document.querySelector('#email-body')
+          email_body.append(email_section);
+          email_body.classList.add('row', 'mx-0', 'mt-3', 'glass', 'p-2');
+        }else{
+          document.querySelector('#email-data').append(email_section);
+          if(email_element === 'sender'){
+            email_section.innerHTML = `From <span class="badge rounded-pill 
+            text-bg-primary my-1">${email[email_element]}</span>`;
+          } else {
+            email_section.innerHTML = `To <span class="badge rounded-pill 
+            text-bg-light my-1">${email[email_element]}</span>`;
+          }
+        }
       })
-      .catch(error =>console.log(error));
-  fetch(`/emails/${email_id}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-          read: true
-      })
-  }).then();
-}
+    })
+  }
