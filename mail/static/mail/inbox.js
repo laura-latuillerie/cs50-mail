@@ -33,6 +33,21 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /***********************************************************************/
+/*
+function display_alert(string){
+  const alert_trigger = document.getElementById('archive-btn')
+  const alert_message = document.getElementById('toast-body')
+  const alert = document.getElementById('liveToast')
+  if (alert_trigger) {
+    alert_trigger.addEventListener('click', () => {
+    const toast = new bootstrap.Toast(alert)
+    alert_message.innerHTML = `${string}`
+    toast.show()
+  })
+  }
+}
+*/
+/***********************************************************************/
 //
 function compose_email() {
   // Show compose view and hide other views
@@ -49,6 +64,16 @@ function compose_email() {
 
 /***********************************************************************/
 //
+function reply_email(email) {
+  compose_email();
+  document.querySelector('#compose-recipients').value = email["sender"];
+  document.querySelector('#compose-subject').value = "Re: " + email["subject"] ;
+  const pre_body_text = `\n \n \n------ On ${email['timestamp']} ${email["sender"]} wrote : \n`;
+  document.querySelector('#compose-body').value = ` ${pre_body_text} \n ${email["body"]} \n`;
+}
+
+/***********************************************************************/
+//
 function read(email_id) {
   fetch(`/emails/${email_id}`, {
     method: 'PUT',
@@ -57,30 +82,30 @@ function read(email_id) {
     })
   })
 }
-
-function archive_email(email_id) {
-  fetch(`/emails/${email_id}`, {
-    method: 'PUT',
+/***********************************************************************/
+//
+function archive_email(email) {
+  const status = email.archived === false ? true : false;
+  console.log(status)
+  fetch(`/emails/${email.id}`, {
+    method: "PUT",
     body: JSON.stringify({
-      archived: true
+      archived: status
     })
-  }).then( () => load_mailbox("archive"));
+  })
+  .then(() => load_mailbox('inbox'));
 }
 
 /***********************************************************************/
 //
 function send_email() {
-  // Get email components' values from the form
-  const recipients = document.querySelector('#compose-recipients').value;
-  const subject = document.querySelector('#compose-subject').value;
-  const body = document.querySelector('#compose-body').value;
-  // Fetch Api and post the form
+  // Fetch Api, assign the data values with queries
   fetch('/emails', {
     method: 'POST',
     body: JSON.stringify({
-      recipients: recipients,
-      subject: subject,
-      body: body
+      recipients: document.querySelector('#compose-recipients').value,
+      subject: document.querySelector('#compose-subject').value,
+      body: document.querySelector('#compose-body').value
     })
   })
   .then(response => response.json())
@@ -88,10 +113,6 @@ function send_email() {
     console.log(result);
     // When successfully sent, load the "SENT" mailbox
     load_mailbox('sent');
-  })
-  // Error prevention
-  .catch(error => {
-    console.log('Error:', error);
   });
   // Prevent default submission
   return false;
@@ -99,12 +120,20 @@ function send_email() {
 
 /***********************************************************************/
 //
-//
 function load_mailbox(mailbox) {
   hide('#email-view');
   hide('#compose-view');
   show('#emails-view');
+  show('#mailbox-title');
+  show('#email-table-titles')
   clear_HTML('#emails-view');
+  if (mailbox === "sent") {
+    hide('#titles');
+    show_flex('#titles-sent');
+  } else {
+    hide('#titles-sent');
+    show_flex('#titles');
+  }
   // Mailbox Title
   document.querySelector('#mailbox-title').innerHTML = `<h3 class="text-center">${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
   // API
@@ -116,7 +145,6 @@ function load_mailbox(mailbox) {
       email_line.classList.add("row", "email-line", "my-2", "px-1", "rounded", email["read"] ? "read" : "unread");
       email_line.addEventListener('click', () => load_email(email["id"], mailbox));
       document.querySelector('#emails-view').append(email_line);
-      
       const sections_sent = [['recipients', 3], ['timestamp', 2], ['subject', 3], ['body', 4] ];
       const sections = [['sender', 3], ['timestamp', 2], ['subject', 3], ['body', 4] ];
       
@@ -143,16 +171,8 @@ function load_mailbox(mailbox) {
           }
         })
       })
-      show('#email-table-titles')
-      if (mailbox === "sent") {
-        hide('#titles');
-        show_flex('#titles-sent');
-      } else {
-        hide('#titles-sent');
-        show_flex('#titles');
-      }
     }
-  
+    
     /***********************************************************************/
     //
     function load_email(email_id, mailbox) {
@@ -174,12 +194,6 @@ function load_mailbox(mailbox) {
           const email_section = document.createElement('div');
           email_section.id = `email-${email_element}-section`;
           email_section.innerHTML = `<span>${email[email_element]}</span>`;
-          if (mailbox !== 'sent'){
-            show_ib('#reply-btn');
-            document.querySelector("#reply-btn").addEventListener("click", () => reply_email(email));
-          } else {
-            hide('#reply-btn');
-          }
           // Personnalized positions and CSS classes for each email component
           if (email_element === 'subject'){
             document.querySelector('#subject-timestamp').append(email_section);
@@ -203,18 +217,20 @@ function load_mailbox(mailbox) {
             }
           }
         })
+        
+        // Reply/Archive button rules
+        if (mailbox === 'sent'){
+          hide('#reply-btn');
+          hide('#archive-btn');
+        } else {
+          show_ib('#reply-btn');
+          document.querySelector("#reply-btn").addEventListener("click", () => reply_email(email));
+          show_ib('#archive-btn');
+          const archive_btn = document.querySelector('#archive-btn')
+          archive_btn.innerHTML = `${email["archived"] ? "Unarchive" : "Archive"}`;
+          document.querySelector("#archive-btn").addEventListener("click", () => archive_email(email));
+        }
       })
       // Mark the email as read
       read(email_id);
     }
-
-     /***********************************************************************/
-    //
-    function reply_email(email) {
-      compose_email();
-      document.querySelector('#compose-recipients').value = email["sender"];
-      document.querySelector('#compose-subject').value = "Re: " + email["subject"] ;
-      const pre_body_text = `\n \n \n------ On ${email['timestamp']} ${email["sender"]} wrote : \n`;
-      document.querySelector('#compose-body').value = ` ${pre_body_text} \n ${email["body"]} \n`;
-}
-    

@@ -3,6 +3,17 @@
 
 {% block body %}
 <div class="container align-items-center justify-content-center glass">
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">📧 Mailbox</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body" id="toast-body">
+      Hello, world! This is a toast message.
+    </div>
+  </div>
+</div>
     <!-- HEADER with LOGO, LOGIN Nav -->
     <div class="row align-items-center" id="navbar">
         <div class="col-sm-6 d-flex align-items-center">
