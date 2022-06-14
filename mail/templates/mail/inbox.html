@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block body %}
-<div class="container align-items-center glass">
+<div class="container align-items-center justify-content-center glass">
     <!-- HEADER with LOGO, LOGIN Nav -->
     <div class="row align-items-center" id="navbar">
         <div class="col-sm-6 d-flex align-items-center">
@@ -20,60 +20,73 @@
             <button class="btn btn-sm btn-light" id="inbox"><i class="fa-solid fa-inbox"></i> Inbox</button>
             <button class="btn btn-sm btn-light" id="sent"><i class="fa-solid fa-arrow-up-right-from-square"></i>
                 Sent</button>
-            <button class="btn btn-sm btn-light" id="archived"><i class="fa-solid fa-box-archive"></i> Archived</button>
-            <button class="btn btn-sm btn-light text-success" id="compose"><i class="fa-solid fa-pen-to-square"></i>
-                New ✨</button>
-        </div>
-        <br>
-        <br>
-    </div>
-    <!-- MAILBOX TITLE -->
-    <div class="row mb-2" id="mailbox-title">
-    </div>
-    <!-- EMAILS TABLE : Titles -->
-    <div class="row glass-darker mx-1 px-2 py-1 mb-1" id="email-table-titles-view">
-    </div>
-    <!-- EMAILS TABLE : Content = EMAILS -->
-    <div class="row glass mx-1 mb-5" id="email-table-content">
-        <div id="emails-view" class="text-justify">
-        </div>
-        <div id="compose-view" class="text-center">
-            <h3>New Email</h3>
-            <form id="compose-form">
-                <div class="form-group my-3 text-start">
-                    From: <input disabled class="form-control" value="{{ request.user.email }}">
+                <button class="btn btn-sm btn-light" id="archived"><i class="fa-solid fa-box-archive"></i> Archived</button>
+                <button class="btn btn-sm btn-light text-success" id="compose"><i class="fa-solid fa-pen-to-square"></i>
+                    New ✨</button>
                 </div>
-                <div class="form-group my-3 text-start">
-                    To: <input id="compose-recipients" class="form-control">
-                </div>
-                <div class="form-group my-3">
-                    <input class="form-control" id="compose-subject" placeholder="Subject">
-                </div>
-                <textarea class="form-control my-3" id="compose-body" placeholder="Body" rows="6"></textarea>
-                <input type="submit" class="btn btn-primary" id="send-email-btn" />
-            </form>
-        </div>
-        <div id="email-view">
-            <div class="row" id="subject-timestamp">
-
+                <br>
+                <br>
             </div>
-            <div class="row text-start" id="email-data">
+            <!-- MAILBOX TITLE -->
+            <div class="row mb-2" id="mailbox-title">
             </div>
-            <div class="row" id="email-status-btn">
-                <div class="col text-end">
-                <button type="button" class="btn btn-primary" id="reply-btn">Reply</button>
-                <button type="button" class="btn btn-danger" id="archive-btn">Archive it</button>
+            <!-- EMAILS TABLE : Titles -->
+            <div id="email-table-titles">
+                <div id="titles" class="row glass-darker mx-1 py-2 mb-2">
+                    <div class="col-3"><span class="fw-bold">From</span></div>
+                    <div class="col-2"><span class="fw-bold">Date</span></div>
+                    <div class="col-3"><span class="fw-bold">Subject</span></div>
+                    <div class="col-4"><span class="fw-bold">Message</span></div>
                 </div>
-            </div>
-            <div class="row px-0 py-3" id="email-body">
+                <div id="titles-sent" class="row glass-darker mx-1 py-2 mb-2">
+                    <div class="col-3"><span class="fw-bold">Sent to</span></div>
+                    <div class="col-2"><span class="fw-bold">Date</span></div>
+                    <div class="col-3"><span class="fw-bold">Subject</span></div>
+                    <div class="col-4"><span class="fw-bold">Message</span></div>
+                </div>
             </div>
             
+            <!-- EMAILS TABLE : Content = EMAILS -->
+            <div class="row glass mx-1 mb-5" id="email-table-content">
+                <div id="emails-view" class="text-justify">
+                </div>
+                <div id="compose-view" class="text-center">
+                    <h3>New Email</h3>
+                    <form id="compose-form">
+                        <div class="form-group my-3 text-start">
+                            From: <input disabled class="form-control" value="{{ request.user.email }}">
+                        </div>
+                        <div class="form-group my-3 text-start">
+                            To: <input id="compose-recipients" class="form-control">
+                        </div>
+                        <div class="form-group my-3">
+                            <input class="form-control" id="compose-subject" placeholder="Subject">
+                        </div>
+                        <textarea class="form-control my-3" id="compose-body" placeholder="Body" rows="6"></textarea>
+                        <input type="submit" class="btn btn-primary" id="send-email-btn" />
+                    </form>
+                </div>
+                <div id="email-view">
+                    <div class="row" id="subject-timestamp">
+                        
+                    </div>
+                    <div class="row text-start" id="email-data">
+                    </div>
+                    <div class="row" id="email-status-btn">
+                        <div class="col text-end">
+                            <button type="button" class="btn btn-primary" id="reply-btn">Reply</button>
+                            <button type="button" class="btn btn-danger" id="archive-btn">Archive it</button>
+                        </div>
+                    </div>
+                    <div class="row px-0 py-3" id="email-body">
+                    </div>
+                    
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-
-{% endblock %}
-
-{% block script %}
-<script src="{% static 'mail/inbox.js' %}"></script>
-{% endblock %}
+        
+        {% endblock %}
+        
+        {% block script %}
+        <script src="{% static 'mail/inbox.js' %}"></script>
+        {% endblock %}
