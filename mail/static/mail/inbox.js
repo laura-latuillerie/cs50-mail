@@ -3,15 +3,12 @@
 function hide(component){
   document.querySelector(component).style.display = 'none';
 }
-
 function show(component){
   document.querySelector(component).style.display = 'block';
 }
-
 function clear(component){
   document.querySelector(component).value = '';
 }
-
 function clear_HTML(component){
   document.querySelector(component).innerHTML =  '';
 }
@@ -26,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#compose').addEventListener('click', compose_email);
   // When you compose a new email and submit this form, it triggers the send email function
   document.querySelector('#compose-form').addEventListener('submit', send_email);
+  
   // By default, load the inbox
   load_mailbox('inbox');
 });
@@ -41,6 +39,26 @@ function compose_email() {
   clear('#compose-recipients');
   clear('#compose-subject');
   clear('#compose-body');
+}
+
+/***********************************************************************/
+//
+function read(email_id) {
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        read: true
+    })
+  })
+}
+
+function archive_email(email_id) {
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        archived: true
+    })
+}).then( () => load_mailbox("archive"));
 }
 
 /***********************************************************************/
@@ -99,17 +117,9 @@ function load_mailbox(mailbox) {
     emails.forEach(email => {
       // Create an HTML Div for all the "email lines"
       const email_line = document.createElement('div');
-      // If this is the email line created for a titling purpose,
       if (email ===  email_table_titles) {
         // Add specific html details to it
-        email_line.classList.add("d-flex", "fw-bold");
         email_line.id = 'email-table-titles';
-        // The condition below is my solution to prevent the titling row to repeat when toggling the nav buttons.
-        if (document.querySelector('#email-table-titles')) {
-          console.log('Already have titles')
-        } else {
-          document.querySelector('#email-table-titles-view').append(email_line);
-        }
       }
       // Create an email line :
       email_table_sections.forEach(
@@ -132,11 +142,14 @@ function load_mailbox(mailbox) {
           email_line.addEventListener('click', () => load_email(email["id"], mailbox));
           // All the email lines will append and appear in the "emails view" div
           document.querySelector('#emails-view').append(email_line);
+        } else if(email === email_table_titles && !document.querySelector('#email-table-titles')) {
+          email_line.classList.add("d-flex", "fw-bold");
+          document.querySelector('#email-table-titles-view').append(email_line);
         }
+        })
       })
-    })
-  }
-  
+    }
+       
   /***********************************************************************/
   //
   function load_email(email_id) {
@@ -182,4 +195,7 @@ function load_mailbox(mailbox) {
         }
       })
     })
+    // The email is set to put to "read" status when the load (single) email function is used
+    read(email_id);
+
   }
