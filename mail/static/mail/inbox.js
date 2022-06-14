@@ -9,6 +9,9 @@ function show(component){
 function show_flex(component){
   document.querySelector(component).style.display = 'flex';
 }
+function show_ib(component){
+  document.querySelector(component).style.display = 'inline-block';
+}
 function clear(component){
   document.querySelector(component).value = '';
 }
@@ -24,9 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
-  // When you compose a new email and submit this form, it triggers the send email function
   document.querySelector('#compose-form').addEventListener('submit', send_email);
-  
   // By default, load the inbox
   load_mailbox('inbox');
 });
@@ -36,6 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function compose_email() {
   // Show compose view and hide other views
   hide('#email-table-titles');
+  hide('#mailbox-title');
+  hide('#email-view');
   hide('#emails-view');
   show('#compose-view');
   // Clear out composition fields
@@ -113,10 +116,10 @@ function load_mailbox(mailbox) {
       email_line.classList.add("row", "email-line", "my-2", "px-1", "rounded", email["read"] ? "read" : "unread");
       email_line.addEventListener('click', () => load_email(email["id"], mailbox));
       document.querySelector('#emails-view').append(email_line);
-
+      
       const sections_sent = [['recipients', 3], ['timestamp', 2], ['subject', 3], ['body', 4] ];
       const sections = [['sender', 3], ['timestamp', 2], ['subject', 3], ['body', 4] ];
-
+      
       if (mailbox === "sent") {
         sections_sent.forEach(
           section => {
@@ -140,6 +143,7 @@ function load_mailbox(mailbox) {
           }
         })
       })
+      show('#email-table-titles')
       if (mailbox === "sent") {
         hide('#titles');
         show_flex('#titles-sent');
@@ -148,9 +152,10 @@ function load_mailbox(mailbox) {
         show_flex('#titles');
       }
     }
+  
     /***********************************************************************/
     //
-    function load_email(email_id) {
+    function load_email(email_id, mailbox) {
       // Show the mail view and hide other views
       hide('#emails-view');
       hide('#compose-view');
@@ -169,7 +174,13 @@ function load_mailbox(mailbox) {
           const email_section = document.createElement('div');
           email_section.id = `email-${email_element}-section`;
           email_section.innerHTML = `<span>${email[email_element]}</span>`;
-          // Now I use conditionnal to assign personnalized positions, CSS (boostrap classes) and content
+          if (mailbox !== 'sent'){
+            show_ib('#reply-btn');
+            document.querySelector("#reply-btn").addEventListener("click", () => reply_email(email));
+          } else {
+            hide('#reply-btn');
+          }
+          // Personnalized positions and CSS classes for each email component
           if (email_element === 'subject'){
             document.querySelector('#subject-timestamp').append(email_section);
             email_section.classList.add('col-8', 'fs-2', 'fw-bold');
@@ -193,7 +204,17 @@ function load_mailbox(mailbox) {
           }
         })
       })
-      // The email is set to put to "read" status when the load (single) email function is used
+      // Mark the email as read
       read(email_id);
-      
     }
+
+     /***********************************************************************/
+    //
+    function reply_email(email) {
+      compose_email();
+      document.querySelector('#compose-recipients').value = email["sender"];
+      document.querySelector('#compose-subject').value = "Re: " + email["subject"] ;
+      const pre_body_text = `\n \n \n------ On ${email['timestamp']} ${email["sender"]} wrote : \n`;
+      document.querySelector('#compose-body').value = ` ${pre_body_text} \n ${email["body"]} \n`;
+}
+    
