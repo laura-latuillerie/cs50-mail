@@ -3,17 +3,6 @@
 
 {% block body %}
 <div class="container align-items-center justify-content-center glass">
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-  <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="toast-header">
-      <strong class="me-auto">📧 Mailbox</strong>
-      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-    <div class="toast-body" id="toast-body">
-      Hello, world! This is a toast message.
-    </div>
-  </div>
-</div>
     <!-- HEADER with LOGO, LOGIN Nav -->
     <div class="row align-items-center" id="navbar">
         <div class="col-sm-6 d-flex align-items-center">
@@ -77,21 +66,7 @@
                         <input type="submit" class="btn btn-primary" id="send-email-btn" />
                     </form>
                 </div>
-                <div id="email-view">
-                    <div class="row" id="subject-timestamp">
-                        
-                    </div>
-                    <div class="row text-start" id="email-data">
-                    </div>
-                    <div class="row" id="email-status-btn">
-                        <div class="col text-end">
-                            <button type="button" class="btn btn-primary" id="reply-btn">Reply</button>
-                            <button type="button" class="btn btn-danger" id="archive-btn">Archive it</button>
-                        </div>
-                    </div>
-                    <div class="row px-0 py-3" id="email-body">
-                    </div>
-                    
+                <div class ='row' id="email-view">
                 </div>
             </div>
         </div>
@@ -100,4 +75,6 @@
         
         {% block script %}
         <script src="{% static 'mail/inbox.js' %}"></script>
+        
+        <!-- JavaScript Bundle with Popper -->
         {% endblock %}
