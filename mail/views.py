@@ -69,7 +69,7 @@ def compose(request):
             for recipient in recipients:
                 email.recipients.add(recipient)
             email.save()
-            return JsonResponse({"message": "Email sent successfully."}, status=201)
+        return JsonResponse({"message": "Email sent successfully."}, status=201)
 
     else :
         return JsonResponse({
@@ -88,11 +88,11 @@ def mailbox(request, mailbox):
         )
     elif mailbox == "sent":
         emails = Email.objects.filter(
-            user=request.user, sender=request.user, deleted=False
+            user=request.user, sender=request.user
         )
     elif mailbox == "archive":
         emails = Email.objects.filter(
-            user=request.user, recipients=request.user, archived=True, deleted=False
+            user=request.user, recipients=request.user, archived=True
         )
     elif mailbox == "trash":
         emails = Email.objects.filter(

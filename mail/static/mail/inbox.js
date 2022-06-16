@@ -65,9 +65,11 @@ function send_email(event) {
   .then(result => {
     if ("message" in result) {
       // The email was sent successfully!
+      console.log('good')
       setTimeout(()=>{ load_mailbox('sent'); }, 100)
       make_alert(result);
     } else {
+      console.log("error")
       make_alert(result);
       console.log("error" in result);
     }
@@ -101,7 +103,7 @@ function archive_email(email_id, status){
       archived: status
     })
   }).then(()=> 
-  load_mailbox('archive'));
+  load_mailbox('inbox'));
 }
 
 function delete_email(email_id) {
@@ -126,7 +128,7 @@ function undelete_email(email_id) {
   })
   .then(result => {
     load_mailbox('inbox')
-    make_alert('Succesfully saved it from 🗑️✨')
+    make_alert('Saved from trash 🧟')
   })
 }
 
@@ -170,9 +172,9 @@ function structure_email_mailbox(array, email, email_line) {
           sender_sec.forEach(section=>{
           section.classList.add('d-flex', 'align-items-center');
           section.innerHTML = `<button class ='btn btn-success p-1 me-1 btn-undelete'>Inbox</button><span>${email['sender']}</span>`;
-          const btns = document.querySelectorAll(".btn-undelete")
-          btns.forEach( btn => { 
-            btn.addEventListener("click", () => undelete_email(email['id']));
+          const btns = document.querySelectorAll("button.btn-undelete")
+          btns.forEach(btn => { 
+          btn.addEventListener("click", () => undelete_email(email['id']));
           })
           })
         } else {
@@ -273,7 +275,7 @@ function structure_email_mailbox(array, email, email_line) {
       delete_btn.addEventListener("click", () => delete_email(email_id));
       if (mailbox === 'trash'){
         hide('#btn-status-view');
-      } else {
+      } else if (mailbox !== 'sent' && mailbox !== 'archive') {
         btn_view.append(delete_btn)
       }
       // Mark the email as read
@@ -290,13 +292,13 @@ function make_alert(message) {
   show('#message-div')
   if (message["message"]) {
     element.classList.add("alert", "alert-success", "alert-dismissible", "fade", "show");
-    element.innerHTML = `🥳<strong>Good!</strong> <span>:${message["message"]}</span>`;
-  } else if (message["message"]) {
+    element.innerHTML = `🥳<strong>Good!</strong> <span>${message["message"]}</span>`;
+  } else if (message["error"]) {
     element.classList.add("alert", "alert-danger", "alert-dismissible", "fade", "show");
     element.innerHTML = `⛔<strong> Error : </strong><span>${message["error"]}</span><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
   } else {
     element.classList.add("alert", "alert-success", "alert-dismissible", "fade", "show");
-    element.innerHTML = `🥳<strong>Good!</strong> <span>:${message}</span>`;
+    element.innerHTML = `✅<strong>Done !</strong> <span>${message}</span>`;
   }
   document.querySelector("#message-div").appendChild(element);
   setTimeout(function(){ bsAlert.close(); }, 3000)

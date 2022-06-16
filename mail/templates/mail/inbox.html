@@ -14,7 +14,7 @@
             
         </div>
         <div class="col-sm-6 text-end">
-            <h2 class="fs-6 d-inline">🐼 {{ request.user.email }}</h2>
+            <h2 class="fs-6 d-inline">{{ request.user.email }}</h2>
             <a class="btn btn-sm btn-danger" href="{% url 'logout' %}">Log Out</a>
         </div>
     </div>
