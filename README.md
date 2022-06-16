@@ -2,7 +2,7 @@
 Project 3 of Harvard's CS50 Programming Course : Mail Web App<br>
 Picture below is provided by Harvard. My capture arriving soon.
 
-![website capture](https://cs50.harvard.edu/web/2020/projects/3/images/inbox.png "website example")
+![website capture](https://i9.ytimg.com/vi_webp/gv61hVqPWCM/sddefault.webp?sqp=CPjjrZUG&rs=AOn4CLA1C4-UG4_-aWllilKgxNtAypClvA "website example")
 <br/>
 
 ## Project's Requirements
