@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
+  document.querySelector('#trash').addEventListener('click', () => load_mailbox('trash'));
   document.querySelector('#compose').addEventListener('click', compose_email);
-  document.querySelector('#compose-form').addEventListener('submit', send_email);
+  document.querySelector('#send-email-btn').addEventListener('click', send_email);
 
   // By default, load the inbox
   load_mailbox('inbox');
@@ -46,7 +47,8 @@ function compose_email() {
 }
 
 /***********************************************************************/
-function send_email() {
+function send_email(event) {
+  event.preventDefault();
   const recipients = document.querySelector('#compose-recipients').value;
   const subject = document.querySelector('#compose-subject').value;
   const body = document.querySelector('#compose-body').value;
@@ -61,8 +63,15 @@ function send_email() {
   })
   .then(response => response.json())
   .then(result => {
-    load_mailbox('sent');
-  });
+    if ("message" in result) {
+      // The email was sent successfully!
+      setTimeout(()=>{ load_mailbox('sent'); }, 100)
+      make_alert(result);
+    } else {
+      make_alert(result);
+      console.log("error" in result);
+    }
+})
 }
 /***********************************************************************/
 
@@ -95,6 +104,32 @@ function archive_email(email_id, status){
   load_mailbox('archive'));
 }
 
+function delete_email(email_id) {
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      deleted: true
+    })
+  })
+  .then(result => {
+    load_mailbox('trash')
+    make_alert('Succesfully Deleted 🗑️✨')
+  })
+}
+
+function undelete_email(email_id) {
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      deleted: false
+    })
+  })
+  .then(result => {
+    load_mailbox('inbox')
+    make_alert('Succesfully saved it from 🗑️✨')
+  })
+}
+
 /***********************************************************************/
 function structure_email_mailbox(array, email, email_line) {
   array.forEach(
@@ -121,15 +156,25 @@ function structure_email_mailbox(array, email, email_line) {
       emails.forEach(email => {
         // Email line component (email 'design' for mailbox)
         const email_line = document.createElement('div');
-        email_line.classList.add("row", "email-line", "my-2", "px-1", "rounded", email["read"] ? "read" : "unread", email["archived"] ? "archived" : "unarchived");
+        email_line.classList.add("row", "email-line", "my-2", "px-1", "rounded", email["read"] ? "read" : "unread", email["archived"] ? "archived" : "unarchived", 'align-items-center');
         // Each email line links to its single email view
         email_line.addEventListener('click', () => load_email(email["id"], mailbox));
         // Sections structure in an email line
-        const sections_sent = [['recipients', 3], ['timestamp', 2], ['subject', 3], ['body', 4] ];
-        const sections = [['sender', 3], ['timestamp', 2], ['subject', 3], ['body', 4] ];
+        const sections_sent = [['recipients', 3], ['timestamp', 2], ['subject', 3], ['body', 4]];
+        const sections = [['sender', 4], ['timestamp', 2], ['subject', 2], ['body', 4] ];
         if (mailbox === "sent") {
           structure_email_mailbox(sections_sent, email, email_line);
-          email_line.classList.add("bg-dark");
+        } else if (mailbox === "trash") {
+          structure_email_mailbox(sections, email, email_line);
+          const sender_sec = document.querySelectorAll(".sender-section");
+          sender_sec.forEach(section=>{
+          section.classList.add('d-flex', 'align-items-center');
+          section.innerHTML = `<button class ='btn btn-success p-1 me-1 btn-undelete'>Inbox</button><span>${email['sender']}</span>`;
+          const btns = document.querySelectorAll(".btn-undelete")
+          btns.forEach( btn => { 
+            btn.addEventListener("click", () => undelete_email(email['id']));
+          })
+          })
         } else {
           structure_email_mailbox(sections, email, email_line);
         }
@@ -200,11 +245,11 @@ function structure_email_mailbox(array, email, email_line) {
           break;
         }
       })
+      const btn_view = document.createElement('div');
+      btn_view.id = 'btn-status-view';
+      btn_view.classList.add('text-center', 'my-3');
+      document.querySelector('#email-view').append(btn_view);
       if (mailbox !== 'sent'){
-        const btn_view = document.createElement('div');
-        btn_view.id = 'btn-status-view';
-        btn_view.classList.add('text-center', 'my-3');
-        document.querySelector('#email-view').append(btn_view);
         // Reply
         const reply_btn = document.createElement('button');
         reply_btn.id = 'reply-btn';
@@ -220,8 +265,39 @@ function structure_email_mailbox(array, email, email_line) {
         archive_btn.addEventListener("click", () => archive_email(email_id, !email["archived"]));
         btn_view.append(archive_btn);
       };
+      // Delete
+      const delete_btn = document.createElement('button');
+      delete_btn.id = 'delete-btn';
+      delete_btn.classList.add('btn', 'btn-danger', 'mx-1'),
+      delete_btn.innerHTML = 'Delete 🗑️</i>';
+      delete_btn.addEventListener("click", () => delete_email(email_id));
+      if (mailbox === 'trash'){
+        hide('#btn-status-view');
+      } else {
+        btn_view.append(delete_btn)
+      }
       // Mark the email as read
       read(email_id);
     })  
   }
-  
+  /**
+ * Renders a bootstrap alert according to the returning status.
+ * @param {JSON} message The status message that the server returns
+ */
+function make_alert(message) {
+  const element = document.createElement("div");
+  const bsAlert = new bootstrap.Alert(element);
+  show('#message-div')
+  if (message["message"]) {
+    element.classList.add("alert", "alert-success", "alert-dismissible", "fade", "show");
+    element.innerHTML = `🥳<strong>Good!</strong> <span>:${message["message"]}</span>`;
+  } else if (message["message"]) {
+    element.classList.add("alert", "alert-danger", "alert-dismissible", "fade", "show");
+    element.innerHTML = `⛔<strong> Error : </strong><span>${message["error"]}</span><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+  } else {
+    element.classList.add("alert", "alert-success", "alert-dismissible", "fade", "show");
+    element.innerHTML = `🥳<strong>Good!</strong> <span>:${message}</span>`;
+  }
+  document.querySelector("#message-div").appendChild(element);
+  setTimeout(function(){ bsAlert.close(); }, 3000)
+}

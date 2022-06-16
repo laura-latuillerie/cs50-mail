@@ -52,24 +52,30 @@ def compose(request):
     subject = data.get("subject", "")
     body = data.get("body", "")
 
+    if body and subject :
     # Create one email for each recipient, plus sender
-    users = set()
-    users.add(request.user)
-    users.update(recipients)
-    for user in users:
-        email = Email(
-            user=user,
-            sender=request.user,
-            subject=subject,
-            body=body,
-            read=user == request.user
-        )
-        email.save()
-        for recipient in recipients:
-            email.recipients.add(recipient)
-        email.save()
+        users = set()
+        users.add(request.user)
+        users.update(recipients)
+        for user in users:
+            email = Email(
+                user=user,
+                sender=request.user,
+                subject=subject,
+                body=body,
+                read=user == request.user
+            )
+            email.save()
+            for recipient in recipients:
+                email.recipients.add(recipient)
+            email.save()
+            return JsonResponse({"message": "Email sent successfully."}, status=201)
 
-    return JsonResponse({"message": "Email sent successfully."}, status=201)
+    else :
+        return JsonResponse({
+                "error": f"Please fill in 'Subject' and/or 'Body' fields"
+            }, status=400)
+    
 
 
 @login_required
@@ -78,15 +84,19 @@ def mailbox(request, mailbox):
     # Filter emails returned based on mailbox
     if mailbox == "inbox":
         emails = Email.objects.filter(
-            user=request.user, recipients=request.user, archived=False
+            user=request.user, recipients=request.user, archived=False, deleted=False
         )
     elif mailbox == "sent":
         emails = Email.objects.filter(
-            user=request.user, sender=request.user
+            user=request.user, sender=request.user, deleted=False
         )
     elif mailbox == "archive":
         emails = Email.objects.filter(
-            user=request.user, recipients=request.user, archived=True
+            user=request.user, recipients=request.user, archived=True, deleted=False
+        )
+    elif mailbox == "trash":
+        emails = Email.objects.filter(
+            user=request.user, deleted=True
         )
     else:
         return JsonResponse({"error": "Invalid mailbox."}, status=400)
@@ -99,7 +109,6 @@ def mailbox(request, mailbox):
 @csrf_exempt
 @login_required
 def email(request, email_id):
-
     # Query for requested email
     try:
         email = Email.objects.get(user=request.user, pk=email_id)
@@ -117,15 +126,25 @@ def email(request, email_id):
             email.read = data["read"]
         if data.get("archived") is not None:
             email.archived = data["archived"]
+        if data.get("deleted") is not None:
+            email.deleted = data["deleted"]
         email.save()
         return HttpResponse(status=204)
-
     # Email must be via GET or PUT
     else:
         return JsonResponse({
             "error": "GET or PUT request required."
         }, status=400)
 
+@csrf_exempt
+@login_required
+def delete(request, email_id):
+    if request.method == "GET":
+        email = Email.objects.get(pk=email_id)
+        email.delete()
+        return JsonResponse({
+            "message": "Message Deleted"
+        }, status=201)
 
 def login_view(request):
     if request.method == "POST":

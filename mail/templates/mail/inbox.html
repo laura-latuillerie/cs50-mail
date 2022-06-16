@@ -2,11 +2,16 @@
 {% load static %}
 
 {% block body %}
+<div id="message-div">
+    
+</div>
 <div class="container align-items-center justify-content-center glass">
     <!-- HEADER with LOGO, LOGIN Nav -->
     <div class="row align-items-center" id="navbar">
-        <div class="col-sm-6 d-flex align-items-center">
-            <h1 class="d-inline fs-2"><i class="fa-solid fa-paper-plane"></i> MAILBOX</h1>
+        <div class="col-sm-6 d-flex">
+           <img src="https://64.media.tumblr.com/7e8a7b2ce8f5d569b504b03d93feace5/tumblr_pd9ufwDDCc1ty99rh_400.gifv" class="img-sm" alt="">
+           <a href="#" class="text-light text-decoration-none"><h1 class="my-0 mx-1">MAILBOX</h1></a>
+            
         </div>
         <div class="col-sm-6 text-end">
             <h2 class="fs-6 d-inline">🐼 {{ request.user.email }}</h2>
@@ -17,64 +22,68 @@
     <!-- MAILBOX NAV : 4 togglers btn -->
     <div class="row" id="mailbox-btns">
         <div class="col-sm-12 text-center">
+            
             <button class="btn btn-sm btn-light" id="inbox"><i class="fa-solid fa-inbox"></i> Inbox</button>
             <button class="btn btn-sm btn-light" id="sent"><i class="fa-solid fa-arrow-up-right-from-square"></i>
                 Sent</button>
                 <button class="btn btn-sm btn-light" id="archived"><i class="fa-solid fa-box-archive"></i> Archived</button>
-                <button class="btn btn-sm btn-light text-success" id="compose"><i class="fa-solid fa-pen-to-square"></i>
-                    New ✨</button>
-                </div>
-                <br>
-                <br>
+                <button class="btn btn-sm btn-light" id="trash"><i class="fa-solid fa-trash-can"></i></i> Trash</button>
+                <button class="btn btn-sm pink-btn d-inline-block px-3 border-light" id="compose"><i class="fa-solid fa-pen-to-square"></i>NEW</button>
             </div>
-            <!-- MAILBOX TITLE -->
-            <div class="row mb-2" id="mailbox-title">
+            <br>
+            <br>
+        </div>
+        <!-- MAILBOX TITLE -->
+        <div class="row mb-2" id="mailbox-title">
+        </div>
+        <!-- EMAILS TABLE : Titles -->
+        <div id="email-table-titles">
+            <div id="titles" class="row glass-darker mx-1 py-2 mb-2">
+                <div class="col-3"><span class="fw-bold">From</span></div>
+                <div class="col-2"><span class="fw-bold">Date</span></div>
+                <div class="col-3"><span class="fw-bold">Subject</span></div>
+                <div class="col-4"><span class="fw-bold">Message</span></div>
             </div>
-            <!-- EMAILS TABLE : Titles -->
-            <div id="email-table-titles">
-                <div id="titles" class="row glass-darker mx-1 py-2 mb-2">
-                    <div class="col-3"><span class="fw-bold">From</span></div>
-                    <div class="col-2"><span class="fw-bold">Date</span></div>
-                    <div class="col-3"><span class="fw-bold">Subject</span></div>
-                    <div class="col-4"><span class="fw-bold">Message</span></div>
-                </div>
-                <div id="titles-sent" class="row glass-darker mx-1 py-2 mb-2">
-                    <div class="col-3"><span class="fw-bold">Sent to</span></div>
-                    <div class="col-2"><span class="fw-bold">Date</span></div>
-                    <div class="col-3"><span class="fw-bold">Subject</span></div>
-                    <div class="col-4"><span class="fw-bold">Message</span></div>
-                </div>
-            </div>
-            
-            <!-- EMAILS TABLE : Content = EMAILS -->
-            <div class="row glass mx-1 mb-5" id="email-table-content">
-                <div id="emails-view" class="text-justify">
-                </div>
-                <div id="compose-view" class="text-center">
-                    <h3>New Email</h3>
-                    <form id="compose-form">
-                        <div class="form-group my-3 text-start">
-                            From: <input disabled class="form-control" value="{{ request.user.email }}">
-                        </div>
-                        <div class="form-group my-3 text-start">
-                            To: <input id="compose-recipients" class="form-control">
-                        </div>
-                        <div class="form-group my-3">
-                            <input class="form-control" id="compose-subject" placeholder="Subject">
-                        </div>
-                        <textarea class="form-control my-3" id="compose-body" placeholder="Body" rows="6"></textarea>
-                        <input type="submit" class="btn btn-primary" id="send-email-btn" />
-                    </form>
-                </div>
-                <div class ='row' id="email-view">
-                </div>
+            <div id="titles-sent" class="row glass-darker mx-1 py-2 mb-2">
+                <div class="col-3"><span class="fw-bold">Sent to</span></div>
+                <div class="col-2"><span class="fw-bold">Date</span></div>
+                <div class="col-3"><span class="fw-bold">Subject</span></div>
+                <div class="col-4"><span class="fw-bold">Message</span></div>
             </div>
         </div>
         
-        {% endblock %}
-        
-        {% block script %}
-        <script src="{% static 'mail/inbox.js' %}"></script>
-        
-        <!-- JavaScript Bundle with Popper -->
-        {% endblock %}
+        <!-- EMAILS TABLE : Content = EMAILS -->
+        <div class="row glass mx-1 mb-5" id="email-table-content">
+            <div id="emails-view" class="text-justify">
+            </div>
+            <div id="compose-view" class="text-center">
+                <h3>New Email</h3>
+                <form id="compose-form">
+                    <div class="form-group my-3 text-start">
+                        From: <input disabled class="form-control" value="{{ request.user.email }}">
+                    </div>
+                    <div class="form-group my-3 text-start">
+                        To: <input id="compose-recipients" class="form-control">
+                        <div id="to-text-error-message">
+                            
+                        </div>
+                    </div>
+                    <div class="form-group my-3">
+                        <input class="form-control" id="compose-subject" placeholder="Subject">
+                    </div>
+                    <textarea class="form-control my-3" id="compose-body" placeholder="Body" rows="6"></textarea>
+                    <button type="submit" class="btn btn-primary" id="send-email-btn">Send</button>
+                </form>
+            </div>
+            <div class ='row' id="email-view">
+            </div>
+        </div>
+    </div>
+    
+    {% endblock %}
+    
+    {% block script %}
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+    <script src="{% static 'mail/inbox.js' %}"></script>
+    {% endblock %}
