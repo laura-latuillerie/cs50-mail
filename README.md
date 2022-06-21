@@ -5,6 +5,9 @@ Picture below is provided by Harvard. My capture arriving soon.
 ![website capture](https://github.com/laura-latuillerie/cs50-mail/blob/main/mail/static/mail/media/screenshot.png?raw=true "website example")
 <br/>
 
+## Demo on Youtube
+<a>https://youtu.be/gv61hVqPWCM</a>
+
 ## Project's Requirements
 ### Send Mail
 When a user submits the email composition form, add JavaScript code to actually send the email.
